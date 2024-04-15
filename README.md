@@ -22,15 +22,85 @@ Search for the project repo -> "alanak24/Datasystems".
 
 Select local destination for repo.
 
-## Project Requirements (temp)
+## Setting up a Virtual Environment
 
-python
-pydantic
-sqlalchemy
-fastapi
-azure-storage-blob
-azure-identity
-python-dotenv
-pandas
-uvicorn
+In bash terminal:
 
+``` bash
+python3 -m venv {environment_name}
+```
+
+Click 'Yes' in the pop up. 
+
+To activate:
+
+``` bash
+source {environment_name}/bin/activate
+```
+
+Select interpreter in `Shift + Cmd + P`, search 'Python: Select Interpreter' -> Python v 3.12.3 (Recommended)
+To unselect interpreter, select the Global option.
+
+Deactivate using `deactivate` in terminal or to remove environment:
+``` bash
+rm -r {environment_name}/
+```
+
+
+## Installations
+
+**Homebrew**
+
+[HomeBrew](https://docs.brew.sh/Installation.html) version 4.2.17 (or latest)
+
+**Bash**
+
+``` bash
+brew install bash
+```
+
+**Azure CLI**
+
+``` bash
+brew update && brew install azure-cli
+``` 
+
+See troubleshooting details [here](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+
+Login to Azure:
+``` bash
+az login
+```
+
+**API for our database**
+
+SQL Alchemy or tutor suggested MS ODBC
+
+**Node.js and npm**
+``` bash
+brew install node
+```
+
+Test versions:
+``` bash
+node -v
+npm -v
+```
+
+**dotenv**
+``` bash
+npm install dotenv --save
+```
+
+## Create a PR
+``` bash
+git branch {branch_name}
+git checkout {branch_name}
+git checkout -b {branch_name}
+```
+
+``` bash
+git add .
+git commit -m "{a message about the pull request/changes added}"
+git push
+```
