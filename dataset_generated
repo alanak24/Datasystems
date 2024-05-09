@@ -124,3 +124,11 @@ wishlist_item_data = generate_wishlist_item_data(num_rows)
 purchase_history_data = generate_purchase_history_data(num_rows)
 purchased_item_data = generate_purchased_item_data(num_rows)
 review_data
+
+data.to_csv('data.csv', index=False)
+usage_data.to_csv('usage_data.csv', index=False)
+user_data.to_csv('user_data.csv', index=False)
+wishlist_item_data.to_csv('wishlist_item_data.csv', index=False)
+purchase_history_data.to_csv('purchase_history_data.csv', index=False)
+purchased_item_data.to_csv('purchased_item_data.csv', index=False)
+review_data.to_csv('review_data.csv', index=False)
