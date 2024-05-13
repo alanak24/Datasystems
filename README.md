@@ -93,14 +93,20 @@ npm install dotenv --save
 ```
 
 ## Create a PR
+
+create branch (if required):
+
 ``` bash
 git branch {branch_name}
 git checkout {branch_name}
 git checkout -b {branch_name}
 ```
 
+commit files to pr:
 ``` bash
 git add .
 git commit -m "{a message about the pull request/changes added}"
 git push
 ```
+
+run `git checkout` in terminal if you want to check what files have been added/changed
