@@ -1,0 +1,10 @@
+python
+python-dotenv
+Node.js
+npm
+sqlalchemy
+fastapi
+azure-storage-blob
+azure-identity
+pandas
+uvicorn[standard]
