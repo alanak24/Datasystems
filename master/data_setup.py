@@ -1,6 +1,5 @@
-import os, io, uuid #, pyodbc
+import os, io, uuid, pyodbc
 import pandas as pd
-import json
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from dotenv import load_dotenv
@@ -16,14 +15,18 @@ server = os.environ.get('SERVER')
 database = os.environ.get('DATABASE')
 connection_string = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
 
+# Create pyodbc engine
+eng = create_engine(f'mssql+pyodbc://{username}:{password}@{server}/{database}?driver=ODBC+Driver+18+for+SQL+Server')
+
 class AzureDB():
-    def __init__(self, local_path = "./data", account_storage=account_storage):
-        # self.local_path = local_path
+    def __init__(self, local_path="./data", account_storage=account_storage):
+        self.local_path = local_path
         self.account_url = f"https://{account_storage}.blob.core.windows.net"
         self.default_credential = DefaultAzureCredential()
-        self.blob_service_client = BlobServiceClient(self.account_url, credential=self.default_credential)
+        self.blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+        self.container_client = None  # Initialize the container client as None
 
-    # create or access container {container_name : csv-files}
+    # create or access container {container_name }
     def access_container(self, container_name):
         # Create Container
         try:
@@ -89,6 +92,52 @@ class AzureDB():
         except Exception as ex:
             print("Exception: ")
             print(ex)
+    
+    def upload_df_db(self, blob_name, blob_df):
+        # Upload blob to table
+        print(f"Uploading {blob_name} to SQL database...")
+        blob_df.to_sql(blob_name, eng, if_exists='replace', index=False)
+        
+        with eng.connect() as con:
+            trans = con.begin()
+            fk_columns = []
+            
+            if f'{blob_name}_id' == col:
+                # Set blob_name_ID as Primary Key
+                con.execute(text(f'ALTER TABLE [dbo].[{blob_name}] ALTER COLUMN {blob_name}_ID int NOT NULL'))
+                con.execute(text(f'ALTER TABLE [dbo].[{blob_name}] ADD CONSTRAINT PK_{blob_name} PRIMARY KEY CLUSTERED ({blob_name}_ID) ASC'))
+                trans.commit()
+
+            # Extract foreign keys
+            for col in blob_df.columns:
+                if 'ID' in col.upper() and col != f'{blob_name}_ID':
+                    fk_columns.append(col)
+            
+            for fk in fk_columns:
+                fk_ref = fk.replace("_ID", "")
+                con.execute(text(f'ALTER TABLE [dbo].[{blob_name}] ADD CONSTRAINT FK_{blob_name} FOREIGN KEY ({fk}) REFERENCES [dbo].[{fk_ref}] ({fk})'))
+                trans.commit()
+    
+    def append_df_db(self, blob_name, blob_df):
+        # Append data to blob table
+        print(f"Appending {blob_name} to SQL database...")
+        blob_df.to_sql(blob_name, eng, if_exists='append', index=False)
+
+    
+    def delete_db(self, table_name):
+        # Delete table
+        print(f"Deleting {table_name}...")
+        with eng.connect() as con:
+            trans = con.begin()
+            con.execute(text(f"DROP TABLE [dbo].[{table_name}]"))
+            trans.commit()
+
+
+    def get_sql_table(self, query):
+        # Execute SQL query
+        df = pd.read_sql_query(query, eng)
+        output = df.to_dict(orient='records')
+        return output
 
 
 
