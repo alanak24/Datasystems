@@ -1,0 +1,3 @@
+*transform
+*.env
+*__pycache__

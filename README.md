@@ -59,6 +59,12 @@ rm -r {environment_name}/
 brew install bash
 ```
 
+**Installation from requirements.txt**
+
+``` bash
+pip install -r requirements.txt
+```
+
 **Azure CLI**
 
 ``` bash
@@ -72,10 +78,6 @@ Login to Azure:
 az login
 ```
 
-**API for our database**
-
-SQL Alchemy or tutor suggested MS ODBC
-
 **Node.js and npm**
 ``` bash
 brew install node
@@ -85,11 +87,6 @@ Test versions:
 ``` bash
 node -v
 npm -v
-```
-
-**dotenv**
-``` bash
-npm install dotenv --save
 ```
 
 ## Create a PR
