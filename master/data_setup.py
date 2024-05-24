@@ -101,8 +101,10 @@ class AzureDB():
         with eng.connect() as con:
             trans = con.begin()
             fk_columns = []
+            columns = list(blob_df.columns)
+
             
-            if f'{blob_name}_id' == col:
+            if f'{blob_name}_id' in columns:
                 # Set blob_name_ID as Primary Key
                 con.execute(text(f'ALTER TABLE [dbo].[{blob_name}] ALTER COLUMN {blob_name}_ID int NOT NULL'))
                 con.execute(text(f'ALTER TABLE [dbo].[{blob_name}] ADD CONSTRAINT PK_{blob_name} PRIMARY KEY CLUSTERED ({blob_name}_ID) ASC'))
