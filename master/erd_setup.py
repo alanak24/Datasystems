@@ -7,10 +7,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# example using "Cleaned_Laptop_data.csv"
-container_name = os.environ.get('CONTAINER_NAME')
 db = AzureDB()
-db.access_container(container_name)
+db.access_container("test-merge")
 
 class ModelAbstract:
     def __init__(self):

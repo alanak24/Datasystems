@@ -78,10 +78,6 @@ class ETLFlow():
         
         # Remove Duplicates
         entity.drop_duplicates(subset=primary_key, keep='first', inplace=True)
-
-
-        for col in columns:
-            print(col)
         
         # TASK: Merge join tables [Wishlist + Wishlist Item, Purchase History + Purchased Item, Purchased Item + Review]
         transformedDF = entity.to_csv('./data/{dataFrame}', sep=',',header=True)
