@@ -13,11 +13,14 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 #Test case 1:  System generates record of new user details
+# Test case 2: System records budget constraints, System records laptop major & usage
+
 def register_user():
     first_name = first_name_var.get()
     last_name = last_name_var.get()
     user_budget = user_budget_var.get()
     user_major = user_major_var.get()
+    user_usage = user_usage_var.get()
     username_info = username_var.get()
     password_info = password_var.get()
     
@@ -103,6 +106,7 @@ def register():
     last_name_var = StringVar()
     user_budget_var = StringVar()
     user_major_var = StringVar()
+    user_usage_var = StringVar()
     username_var = StringVar()
     password_var = StringVar()
 
@@ -146,11 +150,13 @@ def login():
     Label(screen2, text="").pack()
     Button(screen2, text="Login", width=10, height=1, command=login_verify).pack()
 
+# Test case 2: System confirms and saves user preference 
 def clear_registration_form():
     first_name_var.set("")
     last_name_var.set("")
     user_budget_var.set("")
     user_major_var.set("")
+    user_usage_var.set("")
     username_var.set("")
     password_var.set("")
 
