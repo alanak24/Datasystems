@@ -12,7 +12,7 @@ db = mysql.connector.connect(
 )
 
 cursor = db.cursor()
-
+#Test case 1:  System generates record of new user details
 def register_user():
     first_name = first_name_var.get()
     last_name = last_name_var.get()
@@ -37,7 +37,8 @@ def login_verify():
     
     cursor.execute("SELECT * FROM users WHERE Username = %s AND Password = %s", (username1, password1))
     result = cursor.fetchone()
-    
+
+    #Test case 1: System establishes record of User_ID + access time
     if result:
         user_id = result[0]
         now = datetime.now()
@@ -77,6 +78,7 @@ def input_purchase(user_id):
     
     Button(screen8, text="Submit", command=lambda: save_purchase(user_id)).pack()
 
+#Test case 1: System records purchase details 
 def save_purchase(user_id):
     model = laptop_model_var.get()
     date = purchase_date_var.get()
@@ -89,6 +91,7 @@ def save_purchase(user_id):
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"Error: {err}")
 
+# Test case 1: System generates record of new user details  
 def register():
     global screen1
     screen1 = Toplevel(screen)
