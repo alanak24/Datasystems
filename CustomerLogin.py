@@ -84,7 +84,8 @@ def view_recommendations(user_id):
     screen10 = Toplevel(screen)
     screen10.title("Laptop Recommendations")
     screen10.geometry("600x400")
-    
+
+    # Test case 3: System filters laptops based on customer specification 
     cursor.execute("SELECT Budget, Major, Usage FROM preferences WHERE User_ID = %s", (user_id,))
     preferences = cursor.fetchone()
     if not preferences:
@@ -93,7 +94,7 @@ def view_recommendations(user_id):
         return
     
     budget, major, usage = preferences
-    
+   # Test case 3: System lists laptops based on user preference 
     query = "SELECT * FROM laptops WHERE Laptop_Price <= %s"
     params = [budget]
     
@@ -105,14 +106,19 @@ def view_recommendations(user_id):
         query += " AND RAM_GB >= 8"
     elif usage == "Web Browsing":
         query += " AND RAM_GB >= 4"
-    
+
+    # Test case 4: System highlights selected laptop model  
     cursor.execute(query, tuple(params))
     laptops = cursor.fetchall()
+
     
+
+
     for laptop in laptops:
         Label(screen10, text=f"Model: {laptop[1]}, Price: ${laptop[2]}, RAM: {laptop[3]}GB, Brand: {laptop[4]}, SSD: {laptop[5]}GB").pack()
         Button(screen10, text="Add to Wishlist", command=lambda l=laptop: add_to_wishlist(user_id, l)).pack()
 
+# Test case 4: System adds laptop to users Wishlist 
 def add_to_wishlist(user_id, laptop):
     try:
         cursor.execute("INSERT INTO wishlist (User_ID, Laptop_ID) VALUES (%s, %s)", (user_id, laptop[0]))
@@ -120,6 +126,8 @@ def add_to_wishlist(user_id, laptop):
         messagebox.showinfo("Success", f"{laptop[1]} added to wishlist.")
     except mysql.connector.Error as err:
         messagebox.showerror("Error", f"Error: {err}")
+
+#Test case 4: System displays users Wishlist 
 
 def manage_wishlist(user_id):
     global screen11
@@ -134,6 +142,8 @@ def manage_wishlist(user_id):
         Label(screen11, text=f"Model: {item[1]}, Price: ${item[2]}, RAM: {item[3]}GB, Brand: {item[4]}, SSD: {item[5]}GB").pack()
         Button(screen11, text="Remove from Wishlist", command=lambda i=item: remove_from_wishlist(user_id, i[0])).pack()
 
+
+#Test case 4: System displays user adjustments to Wishlist 
 def remove_from_wishlist(user_id, laptop_id):
     try:
         cursor.execute("DELETE FROM wishlist WHERE User_ID = %s AND Laptop_ID = %s", (user_id, laptop_id))
