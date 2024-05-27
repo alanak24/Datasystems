@@ -1,4 +1,4 @@
-brand,model,processor_brand,processor_name,ram_gb,ssd,hdd,os,weight,display_size,Touchscreen,latest_price
+Brand,Laptop_Model,Processor_Brand,Processor_Name,RAM_GB,SSD,HDD,Operating_System,Weight,Display_Size,Touchscreen,Laptop_Price
 Lenovo,A6-9225,AMD,A6-9225 Processor,4 GB GB,0 GB,1024 GB,Windows,ThinNlight,Missing,No,24990
 Lenovo,Ideapad,AMD,APU Dual,4 GB GB,0 GB,512 GB,Windows,Casual,Missing,No,19590
 Avita,PURA,AMD,APU Dual,4 GB GB,128 GB,0 GB,Windows,ThinNlight,Missing,No,19990
