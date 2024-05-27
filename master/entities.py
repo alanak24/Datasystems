@@ -1,7 +1,6 @@
-import os, io, uuid
 import pandas as pd
 from azure.identity import DefaultAzureCredential
-from data_setup import eng
+from db_connect import eng
 from typing import List, Union
 from pydantic import BaseModel
 from datetime import datetime
@@ -84,11 +83,10 @@ class PurchaseHistory(Base):
 class PurchasedItem(Base):
     __tablename__ = 'Purchased_Item'
     purchase_history_id = Column(Integer, ForeignKey(PurchaseHistory.purchase_history_id), nullable=False)
-    user_id = Column(Integer, ForeignKey(PurchaseHistory.user_id), nullable=False)
     laptop_id = Column(Integer, ForeignKey(Laptop.laptop_id), nullable=False)
     date_purchased = Column(DateTime, nullable=False)
-    __table__args__ = (
-        PrimaryKeyConstraint('purchase_history_id', 'user_id', 'laptop_id', name='PK_Purchased_Item')
+    __table_args__ = (
+        PrimaryKeyConstraint('purchase_history_id', 'laptop_id', name='PK_Purchased_Item'),
     )
     
     purchase_history = relationship("PurchaseHistory", back_populates="purchased_items")
@@ -99,7 +97,7 @@ class Review(Base):
     __tablename__ = 'Review'
     review_id = Column(Integer, primary_key=True, nullable=False, index=True)
     purchase_history_id = Column(Integer, ForeignKey(PurchasedItem.purchase_history_id), nullable=False)
-    user_id = Column(Integer, ForeignKey(PurchasedItem.user_id), nullable=False)
+    user_id = Column(Integer, ForeignKey(User.user_id), nullable=False)
     laptop_id = Column(Integer, ForeignKey(PurchasedItem.laptop_id), nullable=False)
     review_rating = Column(Float, nullable=False)
     review_comment = Column(String)
@@ -119,11 +117,11 @@ class Wishlist(Base):
     laptop = relationship("Laptop", back_populates="wishlist_items")
 
 class WishlistItem(Base):
+    __tablename__ = "Wishlist_Item"
     wishlist_id = Column(Integer, ForeignKey(Wishlist.wishlist_id), nullable=False)
-    laptop_id = Column(Integer, ForeignKey(Laptop.laptop_id), nnullable=False)
+    laptop_id = Column(Integer, ForeignKey(Laptop.laptop_id), nullable=False)
     date_added = Column(DateTime, nullable=False)
     time_added = Column(DateTime, nullable=False)
-    __table__args__ = (
-        PrimaryKeyConstraint('wishlist_id', 'laptop_id', name='PK_Wishlist_Item')
+    __table_args__ = (
+        PrimaryKeyConstraint('wishlist_id', 'laptop_id', name='PK_Wishlist_Item'),
     )
-

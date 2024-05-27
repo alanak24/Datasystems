@@ -3,7 +3,7 @@ import pandas as pd
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 
 load_dotenv()
 
@@ -12,11 +12,9 @@ account_storage = os.environ.get('ACCOUNT_STORAGE')
 username = os.environ.get('USERNAME_AZURE')
 password = os.environ.get('PASSWORD')
 server = os.environ.get('SERVER')
-database = os.environ.get('DATABASE')
 connection_string = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
 
-# Create pyodbc engine
-eng = create_engine(f'mssql+pyodbc://{username}:{password}@{server}/{database}?driver=ODBC+Driver+18+for+SQL+Server')
+sql_engine = create_engine('sqlite:///LaptopRecommendation.db', echo=False)
 
 class AzureDB():
     def __init__(self, local_path="./data", account_storage=account_storage):
@@ -24,7 +22,7 @@ class AzureDB():
         self.account_url = f"https://{account_storage}.blob.core.windows.net"
         self.default_credential = DefaultAzureCredential()
         self.blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-        self.container_client = None  # Initialize the container client as None
+        self.container_client = None
 
     # create or access container {container_name }
     def access_container(self, container_name):
@@ -40,14 +38,14 @@ class AzureDB():
             self.container_client = self.blob_service_client.get_container_client(container=container_name)
             self.container_name = container_name
     
-    # delete container
     def delete_container(self):
+        # Delete container
         print("Deleting container")
         self.container_client.delete_container()
         print("Delete complete")
     
-    # upload container
-    def upload_blob(self, blob_name, blob_data = None):
+    def upload_blob(self, blob_name, blob_data=None):
+        # Upload container
         local_file_name = blob_name
         upload_file_path = os.path.join(self.local_path, local_file_name)
         blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=local_file_name)
@@ -56,33 +54,27 @@ class AzureDB():
         with open(file=upload_file_path, mode="rb") as data:
             blob_client.upload_blob(data)
 
-        # if blob_data is not None:
-        #     blob_client.create_blob_from_text(container_name=self.container_name, blob_name=blob_name, text=blob_data)
-        # else:
-        #     # Upload the created file
-        #     with open(file=upload_file_path, mode="rb") as data:
-        #         blob_client.upload_blob(data)
-    
-    # list blobs
     def list_blobs(self):
+        # List blobs
         print("\nBlob List: ")
         blob_list = self.container_client.list_blobs()
         for blob in blob_list:
             print("\t" + blob.name)
 
-    # download blob to local storage
     def download_blob(self, blob_name):
+        # Download blob to local storage
         download_file_path = os.path.join(self.local_path, blob_name)
         print("\nDownloading blob to \n\t" + download_file_path)
         with open(file=download_file_path, mode="wb") as download_file:
             download_file.write(self.container_client.download_blob(blob_name).readall())
     
-    # deleting a blob
     def delete_blob(self, container_name: str, blob_name: str):
+        # Deleting a blob
         print("\nDeleting blob " + blob_name)
     
-    # acces blob csv
+    
     def access_blob_csv(self, blob_name):
+        # Access blob csv
         try:
             print(f"Accessing blob {blob_name}")
 
@@ -96,52 +88,12 @@ class AzureDB():
     def upload_df_db(self, blob_name, blob_df):
         # Upload blob to table
         print(f"Uploading {blob_name} to SQL database...")
-        blob_df.to_sql(blob_name, eng, if_exists='replace', index=False)
-        
-        with eng.connect() as con:
-            trans = con.begin()
-            fk_columns = []
-            columns = list(blob_df.columns)
-
-            
-            if f'{blob_name}_id' in columns:
-                # Set blob_name_ID as Primary Key
-                con.execute(text(f'ALTER TABLE [dbo].[{blob_name}] ALTER COLUMN {blob_name}_ID int NOT NULL'))
-                con.execute(text(f'ALTER TABLE [dbo].[{blob_name}] ADD CONSTRAINT PK_{blob_name} PRIMARY KEY CLUSTERED ({blob_name}_ID) ASC'))
-                trans.commit()
-
-            # Extract foreign keys
-            for col in blob_df.columns:
-                if 'ID' in col.upper() and col != f'{blob_name}_ID':
-                    fk_columns.append(col)
-            
-            for fk in fk_columns:
-                fk_ref = fk.replace("_ID", "")
-                con.execute(text(f'ALTER TABLE [dbo].[{blob_name}] ADD CONSTRAINT FK_{blob_name} FOREIGN KEY ({fk}) REFERENCES [dbo].[{fk_ref}] ({fk})'))
-                trans.commit()
+        blob_df.to_sql(blob_name, sql_engine, if_exists='replace', index=False)
     
     def append_df_db(self, blob_name, blob_df):
         # Append data to blob table
         print(f"Appending {blob_name} to SQL database...")
-        blob_df.to_sql(blob_name, eng, if_exists='append', index=False)
-
-    
-    def delete_db(self, table_name):
-        # Delete table
-        print(f"Deleting {table_name}...")
-        with eng.connect() as con:
-            trans = con.begin()
-            con.execute(text(f"DROP TABLE [dbo].[{table_name}]"))
-            trans.commit()
-
-
-    def get_sql_table(self, query):
-        # Execute SQL query
-        df = pd.read_sql_query(query, eng)
-        output = df.to_dict(orient='records')
-        return output
-
-
+        blob_df.to_sql(blob_name, sql_engine, if_exists='append', index=False)
 
 
 
