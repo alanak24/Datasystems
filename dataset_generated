@@ -1,0 +1,134 @@
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+def generate_data(num_rows):
+    usage_ids = np.random.randint(100000, 999999, size=num_rows, dtype=np.int64)
+    user_ids = np.random.randint(1000000000, 9999999999, size=num_rows, dtype=np.int64)
+    usage_notes = ["Programming and running python scripts using visual studio code.",
+                   "Analyzing data using pandas and matplotlib.",
+                   "Building web applications with Django framework.",
+                   "Machine learning model development using scikit-learn.",
+                   "Creating presentations using Microsoft PowerPoint."]
+    major_usage_notes = np.random.choice(usage_notes, size=num_rows)
+    df = pd.DataFrame({
+        'Usage_ID': usage_ids,
+        'User_ID': user_ids,
+        'Major_Usage_Notes': major_usage_notes
+    })
+    return df
+
+def generate_usage_data(num_rows):
+    usage_ids = np.random.randint(100000, 999999, size=num_rows, dtype=int)
+    usage_types = ["Coding", "Gaming", "Data Analysis", "Web Browsing", "Presentation"]
+    usage_type = np.random.choice(usage_types, size=num_rows)
+    df = pd.DataFrame({
+        'Usage_ID': usage_ids,
+        'Usage_Type': usage_type
+    })
+    return df
+
+def generate_user_data(num_rows):
+    user_ids = np.random.randint(10000000, 99999999, size=num_rows, dtype=int)
+    first_names = ["John", "Jane", "Alice", "Bob", "Michael", "Emily", "David", "Sarah", "Chris", "Olivia"]
+    user_first_names = np.random.choice(first_names, size=num_rows)
+    last_names = ["Smith", "Johnson", "Brown", "Williams", "Jones", "Garcia", "Miller", "Davis", "Martinez", "Taylor"]
+    user_last_names = np.random.choice(last_names, size=num_rows)
+    user_budgets = np.random.randint(1000, 10000, size=num_rows, dtype=int)
+    majors = ["Computer Science", "Electrical Engineering", "Data Science", "Mechanical Engineering", "Business Administration"]
+    user_majors = np.random.choice(majors, size=num_rows)
+    df = pd.DataFrame({
+        'User_ID': user_ids,
+        'User_FirstName': user_first_names,
+        'User_LastName': user_last_names,
+        'User_Budget': user_budgets,
+        'User_Major': user_majors
+    })
+    return df
+
+def generate_wishlist_item_data(num_rows):
+    wishlist_ids = np.random.randint(10000000, 99999999, size=num_rows, dtype=int)
+    laptop_ids = np.random.randint(1000000000, 9999999999, size=num_rows, dtype=np.int64)
+    start_date = datetime(2020, 1, 1)
+    end_date = datetime(2024, 12, 31)
+    date_added = [np.datetime_as_string(np.random.choice(pd.date_range(start=start_date, end=end_date)), unit='D') for _ in range(num_rows)]
+    time_added = [np.datetime_as_string(np.random.choice(pd.date_range(start='00:00:00', end='23:59:59', freq='s')), unit='s') for _ in range(num_rows)]
+    df = pd.DataFrame({
+        'Wishlist_ID': wishlist_ids,
+        'Laptop_ID': laptop_ids,
+        'Date_Added': date_added,
+        'Time_Added': time_added
+    })
+    return df
+
+def generate_purchase_history_data(num_rows):
+    purchase_history_ids = np.random.randint(10000, 99999, size=num_rows, dtype=int)
+    user_ids = np.random.randint(10000000, 99999999, size=num_rows, dtype=int)
+    start_date = datetime(2020, 1, 1)
+    end_date = datetime(2024, 12, 31)
+    date_created = [np.datetime_as_string(np.random.choice(pd.date_range(start=start_date, end=end_date)), unit='D') for _ in range(num_rows)]
+    time_created = [np.datetime_as_string(np.random.choice(pd.date_range(start='00:00:00', end='23:59:59', freq='s')), unit='s') for _ in range(num_rows)]
+    df = pd.DataFrame({
+        'Purchase_History_ID': purchase_history_ids,
+        'User_ID': user_ids,
+        'Date_Created': date_created,
+        'Time_Created': time_created
+    })
+    return df
+
+def generate_purchased_item_data(num_rows):
+    purchase_history_ids = np.random.randint(10000, 99999, size=num_rows, dtype=int)
+    user_ids = np.random.randint(10000000, 99999999, size=num_rows, dtype=int)
+    laptop_ids = np.random.randint(1000000000, 9999999999, size=num_rows, dtype=np.int64)
+    start_date = np.datetime64('2020-01-01')
+    end_date = np.datetime64('2024-12-31')
+    date_purchased = [np.datetime_as_string(np.random.choice(pd.date_range(start=start_date, end=end_date)), unit='D') for _ in range(num_rows)]
+    df = pd.DataFrame({
+        'Purchase_History_ID': purchase_history_ids,
+        'User_ID': user_ids,
+        'Laptop_ID': laptop_ids,
+        'Date_Purchased': date_purchased
+    })
+    return df
+
+def generate_review_data(num_rows):
+    review_ids = np.random.randint(100000, 999999, size=num_rows, dtype=int)
+    laptop_ids = np.random.randint(1000000000, 9999999999, size=num_rows, dtype=np.int64)
+    user_ids = np.random.randint(10000000, 99999999, size=num_rows, dtype=int)
+    purchase_history_ids = np.random.randint(10000, 99999, size=num_rows, dtype=np.int64)
+    review_ratings = np.random.uniform(0, 5, size=num_rows)
+    review_comments = [
+        "Powerful laptop that can perform multiple tasks at a time.",
+        "Great battery life and excellent performance.",
+        "Highly recommended for gaming enthusiasts.",
+        "Excellent build quality and sleek design.",
+        "Average performance for the price, but decent overall."
+    ]
+    review_comments = np.random.choice(review_comments, size=num_rows)
+    df = pd.DataFrame({
+        'Review_ID': review_ids,
+        'Laptop_ID': laptop_ids,
+        'User_ID': user_ids,
+        'Purchase_History_ID': purchase_history_ids,
+        'Review_Rating': review_ratings,
+        'Review_Comment': review_comments
+    })
+    return df
+
+# Data for each table
+num_rows = 10  
+data = generate_data(num_rows)
+usage_data = generate_usage_data(num_rows)
+user_data = generate_user_data(num_rows)
+wishlist_item_data = generate_wishlist_item_data(num_rows)
+purchase_history_data = generate_purchase_history_data(num_rows)
+purchased_item_data = generate_purchased_item_data(num_rows)
+review_data
+
+data.to_csv('data.csv', index=False)
+usage_data.to_csv('usage_data.csv', index=False)
+user_data.to_csv('user_data.csv', index=False)
+wishlist_item_data.to_csv('wishlist_item_data.csv', index=False)
+purchase_history_data.to_csv('purchase_history_data.csv', index=False)
+purchased_item_data.to_csv('purchased_item_data.csv', index=False)
+review_data.to_csv('review_data.csv', index=False)
