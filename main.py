@@ -12,7 +12,7 @@ class ETLFlow():
     def __init__(self, database):
         self.db = database
 
-        # CSV Files
+        # CSV File Name
         self.blobs = ["Brand.csv"
                       ,"Laptop.csv"
                       ,"User.csv"
@@ -20,24 +20,23 @@ class ETLFlow():
                       ,"Purchased_Item.csv"
                       ,"Review.csv"
                       ,"Recommendation.csv"
-                    #   ,"Usage.csv"
+                      ,"Usage.csv"
                       ,"Wishlist.csv"
                       ,"Wishlist_Item.csv"
                       ]
         
-        # Primary Keys
+        # Entity Primary Keys
         self.primary_keys = {
             'Brand' : ['Brand_ID']
             ,'Laptop' : ['Laptop_ID']
+            ,'User' : ['User_ID']
             ,'Purchase_History' : ['Purchase_History_ID', 'User_ID']
             ,'Purchased_Item' : ['Purchase_History_ID', 'User_ID', 'Laptop_ID']
             ,'Review' : ['Review_ID', 'User_ID', 'Purchase_History_ID', 'Laptop_ID']
             ,'Usage' : ['Usage_ID']
-            ,'User' : ['User_ID']
             ,'Wishlist' : ['Wishlist_ID', 'User_ID']
             ,'Wishlist_Item' : ['Wishlist_ID', 'User_ID', 'Laptop_ID']
         }
-
     
     def extract(self, csv_file : str):
         # Extract using pandas: open csv, extract data
@@ -54,30 +53,32 @@ class ETLFlow():
 
 
     def transform(self, dataframe, table_name):
-        # Transform Data Type
+        # Transform Data Frame
         if dataframe is None:
             print("No data to transform.")
             return None
         
         # Transform Date and Time Columns
-        datetime_columns = ['Date_Added', 'Time_Added', 'Date_Created', 'Time_Created', 'Date_Purchased', 'Release_Date']
+        datetime_columns = ['Date_Added', 'Time_Added', 'Date_Created', 'Time_Created', 'Date_Purchased']
 
         columns = list(dataframe.columns)
 
         for col in datetime_columns:
             if col in columns:
                 if 'Date' in col:
-                    dataframe[col] = pd.to_datetime(dataframe[col], errors='coerce')
+                    dataframe[col] = pd.to_datetime(dataframe[col], errors='coerce').dt.date
                 if 'Time' in col:
                     dataframe[col] = pd.to_datetime(dataframe[col], format='%H:%M:%S', errors='coerce').dt.time
         
         ## TRANSFORM BY ENTITY
         # Laptop
+        primary_key = self.primary_keys[table_name]
         if table_name == 'Laptop':
-            # Laptop + Brand on Brand_Name to Brand_ID
+            # TASK: Laptop + Brand on Brand_Name to Brand_ID
             brand_entity = self.db.access_blob_csv('Brand.csv')
             dataframe = pd.merge(dataframe, brand_entity, how='left', left_on='Brand', right_on='Brand_Name')
             dataframe = dataframe.drop(['Brand', 'Brand_Name'], axis=1)
+
             # TASK: Format Price
             # dataframe['Laptop_Price'] = dataframe['Laptop_Price'].astype(str)
             # for row in range(len(dataframe)):
@@ -86,15 +87,22 @@ class ETLFlow():
             #     row['Laptop_Price']
             #     print(row)
 
+            # TASK: Form Unique ID's 
+            if primary_key[0] not in columns:
+                new_pk = f'{table_name}_ID'
+                dataframe.insert(0, f'{new_pk}', range(1000, 1000 + len(dataframe)))
+
         # TASK: Merge join tables [Wishlist + Wishlist Item, Purchase History + Purchased Item, Purchased Item + Review]
 
         # Add primary key if non existant
-        primary_key = self.primary_keys[table_name]
+        # primary_key = self.primary_keys[table_name]
 
-        if primary_key[0] not in columns:
-            new_pk = f'{table_name}_ID'
-            dataframe.insert(0, f'{new_pk}', range(1000, 1000 + len(dataframe)))
+        # if primary_key[0] not in columns:
+        #     new_pk = f'{table_name}_ID'
+        #     dataframe.insert(0, f'{new_pk}', range(1000, 1000 + len(dataframe)))
+
         
+        # Confirm Transformed Columns
         print(list(dataframe.columns))
         
         # Sort Primary Key
@@ -104,8 +112,10 @@ class ETLFlow():
         # Remove Duplicates
         dataframe.drop_duplicates(subset=primary_key, keep='first', inplace=True)
         
+        # Save Transformed Entity
         transformedDF = dataframe.to_csv('./data/{dataFrame}', sep=',',header=True)
 
+        # Return Transformed Dataframe
         print(f'Transformation Completed')
         return dataframe
 
@@ -135,13 +145,6 @@ def main():
 
         # Load
         MainETL.load(transformed_entity, table_name)
-
-        cur = conn.cursor()
-
-        
-    #     for row in cur.execute(f"SELECT * FROM {table_name}"):
-    #         print(row)
-
 
 if __name__ == '__main__':
     main()
