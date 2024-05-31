@@ -38,7 +38,6 @@ if __name__ == "__main__":
         else:
             df = query_database(conn, userInput)
 
-
             save_result(df)
 
 # # Select all query
