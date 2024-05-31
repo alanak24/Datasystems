@@ -14,13 +14,13 @@ class ETLFlow():
 
         # CSV File Name
         self.blobs = ["Brand.csv"
-                      ,"Laptop.csv"
                       ,"User.csv"
+                      ,"Laptop.csv"
                       ,"Purchase_History.csv"
                       ,"Purchased_Item.csv"
-                      ,"Review.csv"
-                      ,"Recommendation.csv"
-                      ,"Usage.csv"
+                    #   ,"Review.csv"
+                    #   ,"Recommendation.csv"
+                    #   ,"Usage.csv"
                       ,"Wishlist.csv"
                       ,"Wishlist_Item.csv"
                       ]
@@ -28,8 +28,8 @@ class ETLFlow():
         # Entity Primary Keys
         self.primary_keys = {
             'Brand' : ['Brand_ID']
-            ,'Laptop' : ['Laptop_ID']
             ,'User' : ['User_ID']
+            ,'Laptop' : ['Laptop_ID']
             ,'Purchase_History' : ['Purchase_History_ID', 'User_ID']
             ,'Purchased_Item' : ['Purchase_History_ID', 'User_ID', 'Laptop_ID']
             ,'Review' : ['Review_ID', 'User_ID', 'Purchase_History_ID', 'Laptop_ID']
@@ -70,22 +70,23 @@ class ETLFlow():
                 if 'Time' in col:
                     dataframe[col] = pd.to_datetime(dataframe[col], format='%H:%M:%S', errors='coerce').dt.time
         
-        ## TRANSFORM BY ENTITY
-        # Laptop
         primary_key = self.primary_keys[table_name]
+
+        ## TRANSFORM BY ENTITY
         if table_name == 'Laptop':
             # TASK: Laptop + Brand on Brand_Name to Brand_ID
             brand_entity = self.db.access_blob_csv('Brand.csv')
-            dataframe = pd.merge(dataframe, brand_entity, how='left', left_on='Brand', right_on='Brand_Name')
-            dataframe = dataframe.drop(['Brand', 'Brand_Name'], axis=1)
+            dataframe = pd.merge(dataframe, brand_entity, how='left', left_on='Brand_Name', right_on='Brand_Name')
+            dataframe = dataframe.drop(['Brand_Name', 'Brand_Name'], axis=1)
 
             # TASK: Format Price
-            # dataframe['Laptop_Price'] = dataframe['Laptop_Price'].astype(str)
-            # for row in range(len(dataframe)):
-            #     entry = dataframe.at[row, 'Laptop_Price']
-            #     entry = entry[:-2] + entry[-2:]
-            #     row['Laptop_Price']
-            #     print(row)
+            dataframe['Laptop_Price'] = dataframe['Laptop_Price'].astype(str)
+            for row in range(len(dataframe)):
+                entry = dataframe.at[row, 'Laptop_Price']
+                entry = entry[:-2] + '.' + entry[-2:]
+                dataframe.at[row, 'Laptop_Price'] = entry
+                # row['Laptop_Price']
+                print(dataframe.at[row, 'Laptop_Price'])
 
             # TASK: Form Unique ID's 
             if primary_key[0] not in columns:

@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from data_setup import AzureDB, eng
-from entities import *
+from master.data_setup import AzureDB, eng
+from master.entities import *
 
 load_dotenv()
 
