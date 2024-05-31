@@ -13,16 +13,17 @@ class ETLFlow():
         self.db = database
 
         # CSV File Name
-        self.blobs = ["Brand.csv"
-                      ,"User.csv"
-                      ,"Laptop.csv"
-                      ,"Purchase_History.csv"
-                      ,"Purchased_Item.csv"
-                    #   ,"Review.csv"
-                    #   ,"Recommendation.csv"
-                    #   ,"Usage.csv"
-                      ,"Wishlist.csv"
-                      ,"Wishlist_Item.csv"
+        self.blobs = [
+            "Brand.csv"
+            ,"User.csv"
+            ,"Laptop.csv"
+            ,"Usage.csv"
+            # ,"Purchase_History.csv"
+            # ,"Purchased_Item.csv"
+            # ,"Review.csv"
+            # ,"Recommendation.csv"
+            # ,"Wishlist.csv"
+            # ,"Wishlist_Item.csv"
                       ]
         
         # Entity Primary Keys
@@ -66,18 +67,23 @@ class ETLFlow():
         for col in datetime_columns:
             if col in columns:
                 if 'Date' in col:
-                    dataframe[col] = pd.to_datetime(dataframe[col], errors='coerce').dt.date
+                    dataframe[col] = pd.to_datetime(dataframe[col], format='%Y/%m/%d', errors='coerce').dt.date
                 if 'Time' in col:
                     dataframe[col] = pd.to_datetime(dataframe[col], format='%H:%M:%S', errors='coerce').dt.time
         
         primary_key = self.primary_keys[table_name]
 
         ## TRANSFORM BY ENTITY
+        if table_name == 'User':
+            usage_entity = self.db.access_blob_csv('Usage.csv')
+            dataframe = pd.merge(dataframe, usage_entity, how='left', left_on='User_ID', right_on='User_ID')
+            dataframe.drop(['Usage_Type', 'Usage_Note'], axis=1, inplace=True)
+
         if table_name == 'Laptop':
             # TASK: Laptop + Brand on Brand_Name to Brand_ID
             brand_entity = self.db.access_blob_csv('Brand.csv')
             dataframe = pd.merge(dataframe, brand_entity, how='left', left_on='Brand_Name', right_on='Brand_Name')
-            dataframe = dataframe.drop(['Brand_Name', 'Brand_Name'], axis=1)
+            dataframe.drop(['Brand_Name', 'Brand_Name'], axis=1, inplace=True)
 
             # TASK: Format Price
             dataframe['Laptop_Price'] = dataframe['Laptop_Price'].astype(str)
@@ -85,23 +91,18 @@ class ETLFlow():
                 entry = dataframe.at[row, 'Laptop_Price']
                 entry = entry[:-2] + '.' + entry[-2:]
                 dataframe.at[row, 'Laptop_Price'] = entry
-                # row['Laptop_Price']
-                print(dataframe.at[row, 'Laptop_Price'])
 
-            # TASK: Form Unique ID's 
-            if primary_key[0] not in columns:
-                new_pk = f'{table_name}_ID'
-                dataframe.insert(0, f'{new_pk}', range(1000, 1000 + len(dataframe)))
+            # TASK: Transform Binary Columns
+        
+        if table_name == 'Usage':
+            # TASK: Get Distinct Usage entries
+            dataframe.drop_duplicates(subset=primary_key, keep='first', inplace=True)
+
+            # TASK: Drop User column
+            dataframe.drop(['User_ID'], axis=1, inplace=True)
+
 
         # TASK: Merge join tables [Wishlist + Wishlist Item, Purchase History + Purchased Item, Purchased Item + Review]
-
-        # Add primary key if non existant
-        # primary_key = self.primary_keys[table_name]
-
-        # if primary_key[0] not in columns:
-        #     new_pk = f'{table_name}_ID'
-        #     dataframe.insert(0, f'{new_pk}', range(1000, 1000 + len(dataframe)))
-
         
         # Confirm Transformed Columns
         print(list(dataframe.columns))
