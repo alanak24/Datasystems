@@ -1,0 +1,21 @@
+Usage_ID,Usage_Type,Usage_Note
+100001,Data Analysis,Data analysis with Python
+100002,Simulation,Circuit simulation using MATLAB
+100003,Design,3D modeling with Blender
+100004,Finance,Creating financial models in Excel
+100005,CAD Modeling,CAD modeling using SolidWorks
+100006,Legal Research,Legal research using Westlaw
+100007,Coding,Programming and running Python scripts using Visual Studio Code
+100008,Financial Analysis,Financial analysis with Bloomberg Terminal
+100009,Marketing Research,Market research using SurveyMonkey
+100010,Statistical Analysis,Statistical analysis using SPSS
+100011,Lab Research,Data analysis using R
+100012,Molecular Modeling,Molecular modeling with ChemDraw
+100013,Simulation,Simulations using COMSOL
+100014,Mathematical Modeling,Mathematical modeling with MATLAB
+100015,Environmental Modeling,Data analysis with ArcGIS
+100016,Patient Management,Patient management using Epic
+100017,Economic Modeling,Economic modeling with STATA
+100018,Policy Modeling,Data analysis with SPSS
+100019,Archival Research,Archival research with JSTOR
+100020,Survey Analysis,Survey analysis with Qualtrics
