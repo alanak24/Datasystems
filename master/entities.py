@@ -38,6 +38,7 @@ class User(Base):
     usage = relationship("Usage", back_populates="user")
     purchase_histories = relationship("PurchaseHistory", back_populates="user")
     reviews = relationship("Review", back_populates="user")
+    recommendation = relationship("Recommendation", back_populates="user")
 
 class Laptop(Base):
     __tablename__ = 'Laptop'
@@ -59,6 +60,7 @@ class Laptop(Base):
     wishlist_items = relationship("WishlistItem", back_populates="laptop")
     purchased_items = relationship("PurchasedItem", back_populates="laptop")
     reviews = relationship("Review", back_populates="laptop")
+    recommended = relationship("Recommendation", back_populates="laptop")
 
 class PurchaseHistory(Base): 
     __tablename__ = 'Purchase_History'
@@ -73,6 +75,7 @@ class PurchaseHistory(Base):
 class PurchasedItem(Base):
     __tablename__ = 'Purchased_Item'
     purchase_history_id = Column(Integer, ForeignKey(PurchaseHistory.purchase_history_id), nullable=False)
+    user_id = Column(Integer, ForeignKey(PurchaseHistory.user_id), nullable=False)
     laptop_id = Column(Integer, ForeignKey(Laptop.laptop_id), nullable=False)
     date_purchased = Column(DateTime, nullable=False)
     __table_args__ = (
@@ -86,15 +89,25 @@ class PurchasedItem(Base):
 class Review(Base):
     __tablename__ = 'Review'
     review_id = Column(Integer, primary_key=True, nullable=False, index=True)
-    purchase_history_id = Column(Integer, ForeignKey(PurchasedItem.purchase_history_id), nullable=False)
-    user_id = Column(Integer, ForeignKey(User.user_id), nullable=False)
     laptop_id = Column(Integer, ForeignKey(PurchasedItem.laptop_id), nullable=False)
+    user_id = Column(Integer, ForeignKey(PurchasedItem.user_id), nullable=False)
+    purchase_history_id = Column(Integer, ForeignKey(PurchasedItem.purchase_history_id), nullable=False)
     review_rating = Column(Float, nullable=False)
     review_comment = Column(String)
 
     purchased_item = relationship("PurchasedItem", back_populates="reviews")
     user = relationship("User", back_populates="reviews")
     laptop = relationship("Laptop", back_populates="reviews")
+
+class Recommendation(Base):
+    __tablename__ = 'Recommendation'
+    recommendation_id = Column(Integer, primary_key=True, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey(User.user_id), nullable=False)
+    laptop_id = Column(Integer, ForeignKey(Laptop.laptop_id), nullable=False)
+    date_added = Column(DateTime, nullable=False)
+
+    user = relationship("User", back_populates="recommendation")
+    laptop = relationship("Laptop", back_populates="recommended")
 
 class Wishlist(Base):
     __tablename__ = 'Wishlist'
