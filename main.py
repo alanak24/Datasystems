@@ -18,9 +18,9 @@ class ETLFlow():
             ,"User.csv"
             ,"Laptop.csv"
             ,"Usage.csv"
-            # ,"Purchase_History.csv"
-            # ,"Purchased_Item.csv"
-            # ,"Review.csv"
+            ,"Purchase_History.csv"
+            ,"Purchased_Item.csv"
+            ,"Review.csv"
             # ,"Recommendation.csv"
             # ,"Wishlist.csv"
             # ,"Wishlist_Item.csv"
@@ -31,9 +31,9 @@ class ETLFlow():
             'Brand' : ['Brand_ID']
             ,'User' : ['User_ID']
             ,'Laptop' : ['Laptop_ID']
-            ,'Purchase_History' : ['Purchase_History_ID', 'User_ID']
-            ,'Purchased_Item' : ['Purchase_History_ID', 'User_ID', 'Laptop_ID']
-            ,'Review' : ['Review_ID', 'User_ID', 'Purchase_History_ID', 'Laptop_ID']
+            ,'Purchase_History' : ['Purchase_History_ID']
+            ,'Purchased_Item' : ['Purchase_History_ID', 'Laptop_ID']
+            ,'Review' : ['Review_ID']
             ,'Usage' : ['Usage_ID']
             ,'Wishlist' : ['Wishlist_ID', 'User_ID']
             ,'Wishlist_Item' : ['Wishlist_ID', 'User_ID', 'Laptop_ID']
@@ -75,6 +75,7 @@ class ETLFlow():
 
         ## TRANSFORM BY ENTITY
         if table_name == 'User':
+            # TASK: User + Usage on User_ID = User_ID
             usage_entity = self.db.access_blob_csv('Usage.csv')
             dataframe = pd.merge(dataframe, usage_entity, how='left', left_on='User_ID', right_on='User_ID')
             dataframe.drop(['Usage_Type', 'Usage_Note'], axis=1, inplace=True)
@@ -100,7 +101,17 @@ class ETLFlow():
 
             # TASK: Drop User column
             dataframe.drop(['User_ID'], axis=1, inplace=True)
+        
+        if table_name == 'Review':
+            # TASK: Merge Review and Purchase History
+            purchases_entity = self.db.access_blob_csv('Purchase_History.csv')
+            purchases_entity.drop(['User_ID'], axis=1, inplace=True)
+            dataframe = pd.merge(dataframe, purchases_entity, how='left', left_on='Purchase_History_ID', right_on='Purchase_History_ID')
 
+            # TASK: Merge Review and Purchased_Items
+            items_entity = self.db.access_blob_csv('Purchased_Item.csv')
+            items_entity.drop(['User_ID', 'Laptop_ID'], axis=1, inplace=True)
+            dataframe = pd.merge(dataframe, items_entity, how='left', left_on='Purchase_History_ID', right_on='Purchase_History_ID')
 
         # TASK: Merge join tables [Wishlist + Wishlist Item, Purchase History + Purchased Item, Purchased Item + Review]
         
