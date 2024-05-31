@@ -17,6 +17,14 @@ class Brand(Base):
 
     laptops = relationship("Laptop", back_populates="Brand")
 
+class Usage(Base):
+    __tablename__ = 'Usage'
+    usage_id = Column(Integer, primary_key=True, nullable=False, index=True)
+    usage_type = Column(String)
+    usage_note = Column(String)
+
+    user = relationship("User", back_populates="usage")
+
 class User(Base):
     __tablename__ = 'User'
     user_id = Column(Integer, primary_key=True, nullable=False, index=True)
@@ -24,16 +32,18 @@ class User(Base):
     last_name = Column(String)
     user_budget = Column(Integer)
     user_major = Column(String)
+    usage_id = Column(Integer, ForeignKey(Usage.usage_id), nullable=False)
 
-    wishlist = relationship("Wishlist", back_populates="User")
-    major_usages = relationship("MajorUsage", back_populates="User")
-    purchase_histories = relationship("PurchaseHistory", back_populates="User")
-    reviews = relationship("Review", back_populates="User")
+    wishlist = relationship("Wishlist", back_populates="user")
+    usage = relationship("Usage", back_populates="user")
+    purchase_histories = relationship("PurchaseHistory", back_populates="user")
+    reviews = relationship("Review", back_populates="user")
 
 class Laptop(Base):
     __tablename__ = 'Laptop'
     laptop_id = Column(Integer, primary_key=True, nullable=False, index=True)
     laptop_model = Column(String)
+    brand_id = Column(Integer, ForeignKey(Brand.brand_id), nullable=False)
     processor_brand = Column(String)
     processor_name = Column(String)
     ram_gb = Column(Integer)
@@ -44,31 +54,11 @@ class Laptop(Base):
     display_size = Column(Float)
     touchscreen = Column(String)
     laptop_price = Column(Float)
-    brand_id = Column(Integer, ForeignKey(Brand.brand_id), nullable=False)
 
     brand = relationship("Brand", back_populates="laptops")
     wishlist_items = relationship("WishlistItem", back_populates="laptop")
     purchased_items = relationship("PurchasedItem", back_populates="laptop")
     reviews = relationship("Review", back_populates="laptop")
-
-class Usage(Base):
-    __tablename__ = 'Usage'
-    usage_id = Column(Integer, primary_key=True, nullable=False, index=True)
-    usage_type = Column(String)
-
-    major_usages = relationship("MajorUsage", back_populates="usage")
-
-class MajorUsage(Base):
-    __tablename__ = 'Major_Usage'
-    usage_id = Column(Integer, ForeignKey(Usage.usage_id), nullable=False)
-    user_id = Column(Integer, ForeignKey(User.user_id), nullable=False)
-    major_note = Column(String)
-    __table_args__ = (
-        PrimaryKeyConstraint('usage_id', 'user_id', name='PK_Major_Usage'),
-    )
-
-    usage = relationship("Usaage", back_populates="major_usages")
-    user = relationship("User", back_populates="major_usages")
 
 class PurchaseHistory(Base): 
     __tablename__ = 'Purchase_History'

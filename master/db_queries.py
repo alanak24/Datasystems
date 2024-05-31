@@ -6,6 +6,7 @@ cur = conn.cursor()
 
 # List all tables
 tables = ["Brand",
+          "Usage",
           "User",
           "Laptop",
           "Purchase_History",
@@ -44,27 +45,3 @@ if __name__ == "__main__":
             df = query_database(conn, userInput)
 
             save_result(df)
-
-# # Select all query
-# for t in tables:
-#     try: 
-#         print(t)
-#         query = f"SELECT * FROM {t}"
-#         df = pd.read_sql_query(query, conn)
-#         print(f"Date from table {t}")
-#         print(df)
-#     except Exception as e:
-#         print(f"Error fetching data from table {t}: {e}")
-
-# Select unique users from purchase_history
-# try: 
-#     purchase_users = pd.read_sql_query("SELECT DISTINCT(User_ID) FROM Purchase_History", conn)
-#     print(purchase_users)
-# except Exception as e:
-#     print(f"Error in retrieving User_ID's from Purchase_History: {e}")
-
-# try:
-#     print("yes")
-# except Exception as e:
-#     print(e)
-    
