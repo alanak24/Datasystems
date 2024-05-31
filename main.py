@@ -1,5 +1,6 @@
 import os, uuid
 import pandas as pd
+import numpy as np
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from dotenv import load_dotenv
@@ -21,7 +22,7 @@ class ETLFlow():
             ,"Purchase_History.csv"
             ,"Purchased_Item.csv"
             ,"Review.csv"
-            # ,"Recommendation.csv"
+            ,"Recommendation.csv"
             # ,"Wishlist.csv"
             # ,"Wishlist_Item.csv"
                       ]
@@ -35,6 +36,7 @@ class ETLFlow():
             ,'Purchased_Item' : ['Purchase_History_ID', 'Laptop_ID']
             ,'Review' : ['Review_ID']
             ,'Usage' : ['Usage_ID']
+            ,'Recommendation' : ['Recommendation_ID']
             ,'Wishlist' : ['Wishlist_ID', 'User_ID']
             ,'Wishlist_Item' : ['Wishlist_ID', 'User_ID', 'Laptop_ID']
         }
@@ -67,7 +69,7 @@ class ETLFlow():
         for col in datetime_columns:
             if col in columns:
                 if 'Date' in col:
-                    dataframe[col] = pd.to_datetime(dataframe[col], format='%Y/%m/%d', errors='coerce').dt.date
+                    dataframe[col] = pd.to_datetime(dataframe[col], errors='coerce').dt.strftime('%Y-%m-%d')
                 if 'Time' in col:
                     dataframe[col] = pd.to_datetime(dataframe[col], format='%H:%M:%S', errors='coerce').dt.time
         
@@ -92,8 +94,25 @@ class ETLFlow():
                 entry = dataframe.at[row, 'Laptop_Price']
                 entry = entry[:-2] + '.' + entry[-2:]
                 dataframe.at[row, 'Laptop_Price'] = entry
+            
+            # TASK: Format RAM_GB, SSD_GB, HDD_GB
+            gb_columns = ['RAM_GB', 'SSD', 'HDD']
+            for col in gb_columns:
+                dataframe[col] = dataframe[col].astype(str)
+                for (row) in range(len(dataframe)):
+                    entry = dataframe.at[row, col]
+                    entry = entry.split(" ")[0]
+                    dataframe.at[row,col] = entry
+
+            # TASK: Format Touchscreen
+            dataframe['Touchscreen'] = dataframe['Touchscreen'].map({'Yes': True, 'No': False})
+
+            # # TASK: Nullify 'Missing' in Display_Size
+            dataframe['Display_Size'] = dataframe['Display_Size'].replace('Missing', np.nan)
 
             # TASK: Transform Binary Columns
+            dataframe['Laptop_ID'] = dataframe['Laptop_ID'].astype(object)
+            dataframe['Brand_ID'] = dataframe['Brand_ID'].astype(object)
         
         if table_name == 'Usage':
             # TASK: Get Distinct Usage entries
@@ -102,21 +121,14 @@ class ETLFlow():
             # TASK: Drop User column
             dataframe.drop(['User_ID'], axis=1, inplace=True)
         
-        if table_name == 'Review':
-            # TASK: Merge Review and Purchase History
-            purchases_entity = self.db.access_blob_csv('Purchase_History.csv')
-            purchases_entity.drop(['User_ID'], axis=1, inplace=True)
-            dataframe = pd.merge(dataframe, purchases_entity, how='left', left_on='Purchase_History_ID', right_on='Purchase_History_ID')
-
-            # TASK: Merge Review and Purchased_Items
-            items_entity = self.db.access_blob_csv('Purchased_Item.csv')
-            items_entity.drop(['User_ID', 'Laptop_ID'], axis=1, inplace=True)
-            dataframe = pd.merge(dataframe, items_entity, how='left', left_on='Purchase_History_ID', right_on='Purchase_History_ID')
-
-        # TASK: Merge join tables [Wishlist + Wishlist Item, Purchase History + Purchased Item, Purchased Item + Review]
+        if table_name == 'Recommendation':
+            # TASK: Assign Recommendation_ID
+            if primary_key[0] not in columns:
+                dataframe.insert(0, f'{table_name}_ID', range(1000, 1000 + len(dataframe)))
         
-        # Confirm Transformed Columns
+        # Confirm Transformed Columns and data types
         print(list(dataframe.columns))
+        print(dataframe.dtypes)
         
         # Sort Primary Key
         if primary_key:
