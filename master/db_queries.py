@@ -12,6 +12,7 @@ tables = ["Brand",
           "Purchase_History",
           "Purchased_Item",
           "Review",
+          "Recommendation",
           "Wishlist",
           "Wishlist_Item"
           ]
