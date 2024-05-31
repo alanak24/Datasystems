@@ -33,7 +33,6 @@ class User(Base):
 class Laptop(Base):
     __tablename__ = 'Laptop'
     laptop_id = Column(Integer, primary_key=True, nullable=False, index=True)
-    brand_id = Column(Integer, ForeignKey(Brand.brand_id), nullable=False)
     laptop_model = Column(String)
     processor_brand = Column(String)
     processor_name = Column(String)
@@ -44,7 +43,8 @@ class Laptop(Base):
     laptop_weight = Column(Integer)
     display_size = Column(Float)
     touchscreen = Column(String)
-    laptop_price = Column(Integer)
+    laptop_price = Column(Float)
+    brand_id = Column(Integer, ForeignKey(Brand.brand_id), nullable=False)
 
     brand = relationship("Brand", back_populates="laptops")
     wishlist_items = relationship("WishlistItem", back_populates="laptop")
@@ -114,7 +114,8 @@ class Wishlist(Base):
     time_created = Column(DateTime, nullable=False)
 
     user = relationship("User", back_populates="wishlist")
-    laptop = relationship("Laptop", back_populates="wishlist_items")
+    wishlist_items = relationship("WishlistItem", back_populates="wishlist")
+    
 
 class WishlistItem(Base):
     __tablename__ = "Wishlist_Item"
@@ -125,3 +126,7 @@ class WishlistItem(Base):
     __table_args__ = (
         PrimaryKeyConstraint('wishlist_id', 'laptop_id', name='PK_Wishlist_Item'),
     )
+
+    wishlist = relationship("Wishlist", back_populates="purchased_item")
+    laptop = relationship("Laptop", back_populates="wishlist_items")
+    
