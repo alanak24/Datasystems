@@ -23,8 +23,8 @@ class ETLFlow():
             ,"Purchased_Item.csv"
             ,"Review.csv"
             ,"Recommendation.csv"
-            # ,"Wishlist.csv"
-            # ,"Wishlist_Item.csv"
+            ,"Wishlist.csv"
+            ,"Wishlist_Item.csv"
                       ]
         
         # Entity Primary Keys
@@ -37,8 +37,8 @@ class ETLFlow():
             ,'Review' : ['Review_ID']
             ,'Usage' : ['Usage_ID']
             ,'Recommendation' : ['Recommendation_ID']
-            ,'Wishlist' : ['Wishlist_ID', 'User_ID']
-            ,'Wishlist_Item' : ['Wishlist_ID', 'User_ID', 'Laptop_ID']
+            ,'Wishlist' : ['Wishlist_ID']
+            ,'Wishlist_Item' : ['Wishlist_ID', 'Laptop_ID']
         }
     
     def extract(self, csv_file : str):
@@ -70,8 +70,8 @@ class ETLFlow():
             if col in columns:
                 if 'Date' in col:
                     dataframe[col] = pd.to_datetime(dataframe[col], errors='coerce').dt.strftime('%Y-%m-%d')
-                if 'Time' in col:
-                    dataframe[col] = pd.to_datetime(dataframe[col], format='%H:%M:%S', errors='coerce').dt.time
+                elif 'Time' in col:
+                    dataframe[col] = pd.to_datetime(dataframe[col], format='%H:%M:%S', errors='coerce').dt.strftime('%H:%M:%S')
         
         primary_key = self.primary_keys[table_name]
 
@@ -111,8 +111,8 @@ class ETLFlow():
             dataframe['Display_Size'] = dataframe['Display_Size'].replace('Missing', np.nan)
 
             # TASK: Transform Binary Columns
-            dataframe['Laptop_ID'] = dataframe['Laptop_ID'].astype(object)
-            dataframe['Brand_ID'] = dataframe['Brand_ID'].astype(object)
+            dataframe['Laptop_ID'] = dataframe['Laptop_ID'].astype(str)
+            dataframe['Brand_ID'] = dataframe['Brand_ID'].astype(str)
         
         if table_name == 'Usage':
             # TASK: Get Distinct Usage entries
@@ -125,6 +125,12 @@ class ETLFlow():
             # TASK: Assign Recommendation_ID
             if primary_key[0] not in columns:
                 dataframe.insert(0, f'{table_name}_ID', range(1000, 1000 + len(dataframe)))
+
+        # TASK: Transform Binary Columns
+        col_to_convert = [col for col in dataframe.columns if dataframe[col].dtype == 'int64']
+
+        for col in col_to_convert:
+            dataframe[col] = dataframe[col].astype(str)
         
         # Confirm Transformed Columns and data types
         print(list(dataframe.columns))
